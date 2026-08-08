@@ -6,7 +6,7 @@ import Button from '../../components/Buttons/Button';
 import Input from '../../components/Forms/FormFields';
 
 export default function ChangePassword() {
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const onSubmit = async (data) => {
     try {
@@ -24,8 +24,8 @@ export default function ChangePassword() {
   return (
     <Card title="Change Password">
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg">
-        <Input label="Current Password" type="password" {...register('currentPassword', { required: true })} />
-        <Input label="New Password" type="password" {...register('newPassword', { required: true, minLength: 8 })} />
+        <Input label="Current Password" type="password" error={errors.currentPassword} {...register('currentPassword', { required: true })} />
+        <Input label="New Password" type="password" error={errors.newPassword} {...register('newPassword', { required: true, minLength: 8 })} />
         <Button type="submit" disabled={isSubmitting}>Update Password</Button>
       </form>
     </Card>

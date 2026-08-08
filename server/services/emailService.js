@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { runInBackground } from '../utils/background.js';
 import { sendEmail, isEmailConfigured, getFromAddress } from '../config/email.js';
 import { isEmailEnabled } from './settingsService.js';
 
@@ -24,7 +25,7 @@ async function sendMail({ to, subject, html, type }) {
 }
 
 export function sendWelcomeEmail(user) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: user.email,
       subject: 'Welcome to Aspire',
@@ -37,7 +38,7 @@ export function sendWelcomeEmail(user) {
 }
 
 export function sendScheduleApprovedEmail(participant, schedule) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: 'Schedule Request Approved',
@@ -50,7 +51,7 @@ export function sendScheduleApprovedEmail(participant, schedule) {
 }
 
 export function sendScheduleRejectedEmail(participant, schedule) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: 'Schedule Request Rejected',
@@ -62,7 +63,7 @@ export function sendScheduleRejectedEmail(participant, schedule) {
 }
 
 export function sendScheduleRequestNotification(supervisor, participant, schedule) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: supervisor.email,
       subject: 'New Schedule Request',
@@ -75,7 +76,7 @@ export function sendScheduleRequestNotification(supervisor, participant, schedul
 }
 
 export function sendEventInvitationEmail(participant, event) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: `New Event: ${event.title}`,
@@ -90,7 +91,7 @@ export function sendEventInvitationEmail(participant, event) {
 }
 
 export function sendEventReminderEmail(participant, event) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: `Reminder: ${event.title}`,
@@ -104,7 +105,7 @@ export function sendEventReminderEmail(participant, event) {
 }
 
 export function sendEventRequestNotification(supervisor, participant, event) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: supervisor.email,
       subject: 'New Event Registration Request',
@@ -117,7 +118,7 @@ export function sendEventRequestNotification(supervisor, participant, event) {
 }
 
 export function sendEventApprovedEmail(participant, event) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: 'Event Registration Approved',
@@ -131,7 +132,7 @@ export function sendEventApprovedEmail(participant, event) {
 }
 
 export function sendEventRejectedEmail(participant, event) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: participant.email,
       subject: 'Event Registration Rejected',
@@ -143,7 +144,7 @@ export function sendEventRejectedEmail(participant, event) {
 }
 
 export function sendFeedbackNotification(supervisor, participant, event, feedback) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: supervisor.email,
       subject: 'New Feedback Submitted',
@@ -158,7 +159,7 @@ export function sendFeedbackNotification(supervisor, participant, event, feedbac
 
 export function sendPasswordResetEmail(user, resetToken) {
   const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: user.email,
       subject: 'Password Reset Request',
@@ -172,7 +173,7 @@ export function sendPasswordResetEmail(user, resetToken) {
 }
 
 export function sendDailySummaryEmail(supervisor, summary) {
-  setImmediate(() => {
+  runInBackground(() => {
     sendMail({
       to: supervisor.email,
       subject: 'Daily Supervisor Summary',

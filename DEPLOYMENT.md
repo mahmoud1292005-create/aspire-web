@@ -141,7 +141,7 @@ npx wrangler secret put CLIENT_URL
 ```
 
 Paste your real `https://aspire.pages.dev` URL, then redeploy:
-
+https://aspire-web.pages.dev/
 ```
 npm run cf:deploy
 ```

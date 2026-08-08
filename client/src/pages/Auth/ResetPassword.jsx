@@ -10,7 +10,7 @@ export default function ResetPassword() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token');
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
   const onSubmit = async (data) => {
     try {
@@ -29,7 +29,7 @@ export default function ResetPassword() {
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <Card title="Reset Password" className="w-full max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input label="New Password" type="password" {...register('password', { required: true, minLength: 8 })} />
+          <Input label="New Password" type="password" error={errors.password} {...register('password', { required: true, minLength: 8 })} />
           <Button type="submit" className="w-full" disabled={isSubmitting || !token}>Reset Password</Button>
         </form>
         <p className="mt-4 text-center text-sm">

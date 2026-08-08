@@ -9,7 +9,7 @@ import Input from '../../components/Forms/FormFields';
 
 export default function Profile() {
   const { user, setUser } = useAuth();
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   useEffect(() => {
     if (user) reset(user);
@@ -28,13 +28,13 @@ export default function Profile() {
   return (
     <Card title="My Profile">
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg">
-        <Input label="First Name" {...register('first_name', { required: true })} />
-        <Input label="Last Name" {...register('last_name', { required: true })} />
+        <Input label="First Name" error={errors.first_name} {...register('first_name', { required: true })} />
+        <Input label="Last Name" error={errors.last_name} {...register('last_name', { required: true })} />
         <Input label="Email" {...register('email')} disabled />
-        <Input label="Phone" {...register('phone')} />
-        <Input label="College" {...register('college', { required: true })} />
-        <Input label="Department" {...register('department', { required: true })} />
-        <Input label="Registration Number" {...register('registration_number', { required: true })} />
+        <Input label="Phone" error={errors.phone} {...register('phone')} />
+        <Input label="College" error={errors.college} {...register('college', { required: true })} />
+        <Input label="Department" error={errors.department} {...register('department', { required: true })} />
+        <Input label="Registration Number" error={errors.registration_number} {...register('registration_number', { required: true })} />
         <Button type="submit" disabled={isSubmitting}>Save Changes</Button>
       </form>
     </Card>

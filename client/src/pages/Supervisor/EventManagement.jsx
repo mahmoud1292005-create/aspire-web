@@ -14,7 +14,9 @@ export default function EventManagement() {
   const [pending, setPending] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const load = () => {
     setLoading(true);
@@ -37,6 +39,21 @@ export default function EventManagement() {
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Create failed');
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/events/${deleteTarget.id}`);
+      toast.success('Event deleted');
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -63,6 +80,13 @@ export default function EventManagement() {
             { key: 'location', label: 'Location' },
             { key: 'start_time', label: 'Start' },
             { key: 'end_time', label: 'End' },
+            {
+              key: 'actions',
+              label: 'Actions',
+              render: (r) => (
+                <Button variant="danger" onClick={() => setDeleteTarget(r)}>Delete</Button>
+              ),
+            },
           ]}
         />
       </Card>
@@ -92,14 +116,27 @@ export default function EventManagement() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Create Event">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input label="Title" {...register('title', { required: true })} />
-          <Input label="Description" {...register('description')} />
-          <Input label="Location" {...register('location')} />
-          <Input label="Date" type="date" {...register('date', { required: true })} />
-          <Input label="Start Time" type="time" {...register('start_time', { required: true })} />
-          <Input label="End Time" type="time" {...register('end_time', { required: true })} />
+          <Input label="Title" error={errors.title} {...register('title', { required: true })} />
+          <Input label="Description" error={errors.description} {...register('description')} />
+          <Input label="Location" error={errors.location} {...register('location')} />
+          <Input label="Date" type="date" error={errors.date} {...register('date', { required: true })} />
+          <Input label="Start Time" type="time" error={errors.start_time} {...register('start_time', { required: true })} />
+          <Input label="End Time" type="time" error={errors.end_time} {...register('end_time', { required: true })} />
           <Button type="submit" disabled={isSubmitting}>Create Event</Button>
         </form>
+      </Modal>
+
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Event">
+        <p className="mb-4 text-sm text-slate-600">
+          Are you sure you want to delete <span className="font-medium text-slate-900">{deleteTarget?.title}</span>?
+          This will also remove its schedules and registrations. This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete Event'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );

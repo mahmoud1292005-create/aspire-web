@@ -14,7 +14,7 @@ export default function ScheduleManagement() {
   const [pending, setPending] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const load = () => {
     setLoading(true);
@@ -91,11 +91,11 @@ export default function ScheduleManagement() {
 
       <Modal open={open} onClose={() => setOpen(false)} title="Create Schedule">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input label="Title" {...register('title', { required: true })} />
-          <Input label="Description" {...register('description')} />
-          <Input label="Date" type="date" {...register('date', { required: true })} />
-          <Input label="Start Time" type="time" {...register('start_time', { required: true })} />
-          <Input label="End Time" type="time" {...register('end_time', { required: true })} />
+          <Input label="Title" error={errors.title} {...register('title', { required: true })} />
+          <Input label="Description" error={errors.description} {...register('description')} />
+          <Input label="Date" type="date" error={errors.date} {...register('date', { required: true })} />
+          <Input label="Start Time" type="time" error={errors.start_time} {...register('start_time', { required: true })} />
+          <Input label="End Time" type="time" error={errors.end_time} {...register('end_time', { required: true })} />
           <Button type="submit" disabled={isSubmitting}>Create</Button>
         </form>
       </Modal>

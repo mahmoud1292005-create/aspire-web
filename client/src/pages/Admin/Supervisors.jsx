@@ -14,7 +14,7 @@ export default function Supervisors() {
   const [supervisors, setSupervisors] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const load = () => {
     api.get('/admin/supervisors').then((res) => setSupervisors(res.data.supervisors || [])).finally(() => setLoading(false));
@@ -50,12 +50,12 @@ export default function Supervisors() {
       />
       <Modal open={open} onClose={() => setOpen(false)} title="Add Supervisor/Admin">
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input label="First Name" {...register('first_name', { required: true })} />
-          <Input label="Last Name" {...register('last_name', { required: true })} />
-          <Input label="Email" type="email" {...register('email', { required: true })} />
-          <Input label="Phone" {...register('phone')} />
-          <Input label="Password" type="password" {...register('password', { required: true, minLength: 8 })} />
-          <Select label="Role" {...register('role', { required: true })}>
+          <Input label="First Name" error={errors.first_name} {...register('first_name', { required: true })} />
+          <Input label="Last Name" error={errors.last_name} {...register('last_name', { required: true })} />
+          <Input label="Email" type="email" error={errors.email} {...register('email', { required: true })} />
+          <Input label="Phone" error={errors.phone} {...register('phone')} />
+          <Input label="Password" type="password" error={errors.password} {...register('password', { required: true, minLength: 8 })} />
+          <Select label="Role" error={errors.role} {...register('role', { required: true })}>
             <option value="Supervisor">Supervisor</option>
             <option value="Admin">Admin</option>
           </Select>

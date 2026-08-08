@@ -10,7 +10,7 @@ import { useState } from 'react';
 
 export default function ForgotPassword() {
   const [message, setMessage] = useState('');
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
   const onSubmit = async (data) => {
     try {
@@ -27,7 +27,7 @@ export default function ForgotPassword() {
       <Card title="Forgot Password" className="w-full max-w-md">
         <EmailStatus message={message} type="success" />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Input label="Email" type="email" {...register('email', { required: true })} />
+          <Input label="Email" type="email" error={errors.email} {...register('email', { required: true })} />
           <Button type="submit" className="w-full" disabled={isSubmitting}>Send Reset Link</Button>
         </form>
         <p className="mt-4 text-center text-sm">

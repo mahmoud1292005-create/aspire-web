@@ -10,7 +10,7 @@ import Loading from '../../components/Loading/Loading';
 export default function Feedback() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm();
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   useEffect(() => {
     api.get('/events').then((res) => {
@@ -41,13 +41,13 @@ export default function Feedback() {
   return (
     <Card title="Submit Feedback">
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg">
-        <Select label="Completed Event" {...register('event_id', { required: true })}>
+        <Select label="Completed Event" error={errors.event_id} {...register('event_id', { required: true })}>
           <option value="">Select event</option>
           {events.map((e) => (
             <option key={e.event_id} value={e.event_id}>{e.title} ({e.date})</option>
           ))}
         </Select>
-        <Select label="Rating" {...register('rating', { required: true })}>
+        <Select label="Rating" error={errors.rating} {...register('rating', { required: true })}>
           <option value="">Select rating</option>
           {[5, 4, 3, 2, 1].map((n) => (
             <option key={n} value={n}>{n} stars</option>
