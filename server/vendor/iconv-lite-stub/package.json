@@ -1,0 +1,7 @@
+{
+  "name": "iconv-lite",
+  "version": "0.0.0-stub",
+  "description": "Minimal UTF-8-only stand-in for iconv-lite, used only to avoid a Cloudflare Workers bundler bug (require_streams is not a function) triggered by iconv-lite's optional streaming extension. Aspire's API only ever sends/receives UTF-8 JSON, so full charset-conversion support isn't needed.",
+  "main": "index.js",
+  "license": "MIT"
+}

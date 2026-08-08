@@ -1,0 +1,27 @@
+{
+	"name": "aspire-server",
+	"main": "src/worker.js",
+	"compatibility_date": "2026-07-27",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"alias": {
+		"iconv-lite": "./vendor/iconv-lite-stub/index.js"
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "8491810f734f4df3a7514beef4db6d11"
+		}
+	],
+	"triggers": {
+		"crons": [
+			"0 * * * *",
+			"* * * * *"
+		]
+	},
+	"vars": {
+		"NODE_ENV": "production",
+		"JWT_EXPIRES_IN": "7d"
+	}
+}
