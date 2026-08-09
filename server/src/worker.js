@@ -9,9 +9,19 @@ import app from '../app.js';
 
 import { getSetting } from '../services/settingsService.js';
 import { sendEventReminders, sendDailySummaries } from '../jobs/reminderJobs.js';
+import { executionContextStorage } from '../utils/executionContext.js';
 
 app.listen(3000);
 const httpHandler = httpServerHandler({ port: 3000 });
+
+// Every request's ctx (and its ctx.waitUntil) gets stashed here, for the
+// duration of that request's async call chain, so background.js can read
+// it back synchronously from inside emailService - see
+// utils/executionContext.js for why this needs to be AsyncLocalStorage
+// rather than a dynamic import.
+function fetchWithContext(request, env, ctx) {
+  return executionContextStorage.run(ctx, () => httpHandler.fetch(request, env, ctx));
+}
 
 // --- Cron jobs -------------------------------------------------------------
 // node-cron (used in server.js for local dev) only works inside a
@@ -40,7 +50,7 @@ async function handleScheduled(event) {
 }
 
 export default {
-  fetch: httpHandler.fetch,
+  fetch: fetchWithContext,
   async scheduled(event, env, ctx) {
     ctx.waitUntil(handleScheduled(event));
   },

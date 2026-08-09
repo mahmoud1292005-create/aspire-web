@@ -3,52 +3,36 @@
 // running:
 //
 // - Plain Node (server.js, local dev, Render): the process just keeps
-//   running, so setImmediate() is enough to defer the work slightly without
-//   blocking the response.
-// - Cloudflare Workers (src/worker.js): the runtime can freeze or tear down
-//   a request's execution context as soon as the response is sent. Anything
-//   scheduled with setImmediate() after that point may simply never run.
-//   Workers' own waitUntil() (importable directly from `cloudflare:workers`,
-//   no need to thread `ctx` through Express) tells the runtime to keep the
-//   Worker alive until the given promise settles (up to 30s), which is
-//   exactly what background email sends need.
+//   running, so just letting the promise run in the background is enough.
+// - Cloudflare Workers (src/worker.js): the runtime can freeze or tear
+//   down a request's execution context as soon as the response is sent.
+//   ctx.waitUntil() is Cloudflare's mechanism for telling the runtime to
+//   stay alive until a given promise settles (up to 30s) - exactly what
+//   background email sends need.
 //
-// This mirrors the runtime-detection pattern already used in
-// config/database.js, so both entry points keep working unchanged.
-
-let cachedWaitUntil = null;
-let detected = false;
-
-async function getWaitUntil() {
-  if (detected) return cachedWaitUntil;
-  detected = true;
-  try {
-    const { waitUntil } = await import('cloudflare:workers');
-    cachedWaitUntil = waitUntil;
-  } catch {
-    cachedWaitUntil = null;
-  }
-  return cachedWaitUntil;
-}
+// Getting the ctx: src/worker.js stashes each request's ctx in
+// executionContextStorage (AsyncLocalStorage) right when the request comes
+// in. We read it back out *synchronously* here - no dynamic import, no
+// async gap - because AsyncLocalStorage.getStore() resolves immediately
+// and correctly follows the async call chain Node/Workers already tracks
+// for us. (An earlier version of this file used a dynamic
+// `import('cloudflare:workers')` instead; that introduced a delay before
+// waitUntil() was actually called, and the Worker could tear the request
+// down before that resolved - which silently dropped the background work
+// entirely. Don't reintroduce that pattern here.)
+import { executionContextStorage } from './executionContext.js';
 
 // Runs `fn` (a function returning a promise) in the background without
-// delaying or being awaited by the caller. On Workers this keeps the
-// runtime alive until `fn()` settles; on Node it just defers to the next
-// tick, matching the previous setImmediate() behavior.
+// delaying or being awaited by the caller.
 export function runInBackground(fn) {
-  getWaitUntil().then((waitUntil) => {
-    if (waitUntil) {
-      waitUntil(
-        Promise.resolve()
-          .then(fn)
-          .catch((err) => console.error('Background task failed:', err.message))
-      );
-    } else {
-      setImmediate(() => {
-        Promise.resolve()
-          .then(fn)
-          .catch((err) => console.error('Background task failed:', err.message));
-      });
-    }
-  });
+  const promise = Promise.resolve()
+    .then(fn)
+    .catch((err) => console.error('Background task failed:', err.message));
+
+  const ctx = executionContextStorage.getStore();
+  if (ctx && typeof ctx.waitUntil === 'function') {
+    ctx.waitUntil(promise);
+  }
+  // On plain Node there's no ctx - the promise above is already scheduled
+  // and the process stays alive on its own, so there's nothing more to do.
 }

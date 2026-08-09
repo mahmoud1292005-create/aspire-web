@@ -14,6 +14,8 @@ export default function ScheduleManagement() {
   const [pending, setPending] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
   const load = () => {
@@ -40,6 +42,21 @@ export default function ScheduleManagement() {
     }
   };
 
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/schedules/${deleteTarget.id}`);
+      toast.success('Schedule deleted');
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const review = async (id, action) => {
     try {
       await api.put(`/schedules/${action}/${id}`);
@@ -62,6 +79,13 @@ export default function ScheduleManagement() {
             { key: 'date', label: 'Date' },
             { key: 'start_time', label: 'Start' },
             { key: 'end_time', label: 'End' },
+            {
+              key: 'actions',
+              label: 'Actions',
+              render: (r) => (
+                <Button variant="danger" onClick={() => setDeleteTarget(r)}>Delete</Button>
+              ),
+            },
           ]}
         />
       </Card>
@@ -98,6 +122,19 @@ export default function ScheduleManagement() {
           <Input label="End Time" type="time" error={errors.end_time} {...register('end_time', { required: true })} />
           <Button type="submit" disabled={isSubmitting}>Create</Button>
         </form>
+      </Modal>
+
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Schedule">
+        <p className="mb-4 text-sm text-slate-600">
+          Are you sure you want to delete <span className="font-medium text-slate-900">{deleteTarget?.title}</span>?
+          This will also remove its schedule requests. This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
+          <Button variant="danger" onClick={confirmDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete Schedule'}
+          </Button>
+        </div>
       </Modal>
     </div>
   );
